@@ -1,0 +1,123 @@
+.timeline-stamp-label {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-size: 0.75em;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+
+.markdown-preview-view .timeline-stamp-label {
+  opacity: 0.85;
+}
+
+.markdown-source-view .timeline-stamp-label {
+  opacity: 0.7;
+}
+
+.timeline-stamp-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.timeline-stamp-modal__label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.timeline-stamp-modal__input {
+  width: 100%;
+}
+
+.timeline-stamp-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.timeline-stamp-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.timeline-stamp-view__empty {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.timeline-stamp-view__list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.timeline-stamp-view__item {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  background-color: var(--background-secondary-alt);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.theme-dark .timeline-stamp-view__item {
+  background-color: var(--background-secondary);
+}
+
+.timeline-stamp-view__item:hover {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+  transform: translateY(-1px);
+}
+
+.timeline-stamp-view__item:focus {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+.timeline-stamp-view__time {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.timeline-stamp-view__time-relative {
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.timeline-stamp-view__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.timeline-stamp-view__badge {
+  align-self: flex-start;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background-color: var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.timeline-stamp-view__snippet {
+  font-size: 0.95em;
+  color: var(--text-normal);
+}
+
+.timeline-stamp-view__meta {
+  margin-top: 0.5rem;
+  font-size: 0.8em;
+  color: var(--text-muted);
+}

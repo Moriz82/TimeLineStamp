@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "module": "ESNext",
+    "target": "ES6",
+    "moduleResolution": "Node",
+    "lib": ["DOM", "ES2020"],
+    "allowJs": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "types": ["obsidian"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

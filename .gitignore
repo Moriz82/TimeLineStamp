@@ -1,0 +1,10 @@
+node_modules
+*.log
+data.json
+main.js
+main.js.map
+.DS_Store
+build
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
