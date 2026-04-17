@@ -505,8 +505,6 @@ class TimeLineStampSettingTab extends PluginSettingTab {
 			.setDesc("Moment.js format string used when stamping selections.")
 			.addText((text) => {
 				text
-					// eslint-disable-next-line obsidianmd/ui/sentence-case
-					.setPlaceholder("YYYY-MM-DD HH:mm")
 					.setValue(this.plugin.settings.timestampFormat)
 					.onChange(async (value) => {
 						const fallback = value.trim() === "" ? DEFAULT_SETTINGS.timestampFormat : value;
