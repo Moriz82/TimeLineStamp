@@ -70,7 +70,7 @@ export default class TimeLineStampPlugin extends Plugin {
 		this.addSettingTab(new TimeLineStampSettingTab(this.app, this));
 
 		this.registerView(VIEW_TYPE_TIMELINE, (leaf) => new TimelineView(leaf, this));
-		this.addRibbonIcon("clock", "Toggle TimeLineStamp timeline", () => {
+		this.addRibbonIcon("clock", "Toggle timeline", () => {
 			void this.toggleTimelineView();
 		});
 
@@ -80,7 +80,7 @@ export default class TimeLineStampPlugin extends Plugin {
 			editorCallback: async (editor: Editor, ctx: MarkdownView | MarkdownFileInfo) => {
 				const file = this.resolveFileFromContext(ctx);
 				if (!file) {
-					new Notice("TimeLineStamp: Active file not available.");
+					new Notice("Active file not available.");
 					return;
 				}
 				const now = moment();
@@ -94,7 +94,7 @@ export default class TimeLineStampPlugin extends Plugin {
 			editorCallback: async (editor: Editor, ctx: MarkdownView | MarkdownFileInfo) => {
 				const file = this.resolveFileFromContext(ctx);
 				if (!file) {
-					new Notice("TimeLineStamp: Active file not available.");
+					new Notice("Active file not available.");
 					return;
 				}
 				const chosen = await this.promptForTimestamp(moment());
@@ -106,8 +106,8 @@ export default class TimeLineStampPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "timeline-stamp-open-view",
-			name: "Open TimeLineStamp timeline",
+			id: "open-timeline",
+			name: "Open timeline",
 			callback: async () => {
 				await this.revealTimelineView();
 			}
@@ -157,7 +157,7 @@ export default class TimeLineStampPlugin extends Plugin {
 	private async applyTimestamp(editor: Editor, file: TFile, stamp: MomentInstance) {
 		const selection = editor.getSelection();
 		if (!selection || selection.length === 0) {
-			new Notice("TimeLineStamp: Highlight text or an image first.");
+			new Notice("Highlight text or an image first.");
 			return;
 		}
 
@@ -188,12 +188,12 @@ export default class TimeLineStampPlugin extends Plugin {
 			await this.revealTimelineView();
 		}
 
-		new Notice(`TimeLineStamp: Added entry at ${formatted}.`);
+		new Notice(`Added entry at ${formatted}.`);
 	}
 
 	private detectSelectionType(selection: string): "text" | "image" {
 		const trimmed = selection.trim();
-		const imageEmbedPattern = /^!\[[^\]]*\]\([^\)]+\)$/;
+		const imageEmbedPattern = /^!\[[^\]]*\]\([^)]+\)$/;
 		const wikiPattern = /^!\[\[[^\]]+\]\]$/;
 		if (wikiPattern.test(trimmed) || imageEmbedPattern.test(trimmed)) {
 			return "image";
@@ -207,7 +207,7 @@ export default class TimeLineStampPlugin extends Plugin {
 			if (match) {
 				return match[1];
 			}
-			const altMatch = selection.match(/!\[([^\]]*)\]\(([^\)]+)\)/);
+			const altMatch = selection.match(/!\[([^\]]*)\]\(([^)]+)\)/);
 			if (altMatch) {
 				return altMatch[1] || altMatch[2];
 			}
@@ -251,16 +251,15 @@ export default class TimeLineStampPlugin extends Plugin {
 	private startAutoScan() {
 		this.stopAutoScan();
 		void this.scanVaultForTimestamps();
-		this.scanIntervalId = window.setInterval(() => {
-			void this.scanVaultForTimestamps();
-		}, 5000);
+		this.scanIntervalId = this.registerInterval(
+			activeWindow.setInterval(() => {
+				void this.scanVaultForTimestamps();
+			}, 5000)
+		);
 	}
 
 	private stopAutoScan() {
-		if (this.scanIntervalId !== null) {
-			window.clearInterval(this.scanIntervalId);
-			this.scanIntervalId = null;
-		}
+		this.scanIntervalId = null;
 	}
 
 	private async scanVaultForTimestamps(): Promise<void> {
@@ -364,7 +363,7 @@ export default class TimeLineStampPlugin extends Plugin {
 		const { workspace } = this.app;
 		const existing = workspace.getLeavesOfType(VIEW_TYPE_TIMELINE);
 		if (existing.length > 0) {
-			workspace.revealLeaf(existing[0]);
+			await workspace.revealLeaf(existing[0]);
 			return;
 		}
 
@@ -372,7 +371,7 @@ export default class TimeLineStampPlugin extends Plugin {
 
 		if (leaf) {
 			await leaf.setViewState({ type: VIEW_TYPE_TIMELINE, active: true });
-			workspace.revealLeaf(leaf);
+			await workspace.revealLeaf(leaf);
 		}
 	}
 
@@ -397,10 +396,10 @@ export default class TimeLineStampPlugin extends Plugin {
 	}
 
 	private async loadPluginData() {
-		const stored = await this.loadData();
+		const stored = (await this.loadData()) as Partial<TimeLineStampData> | null;
 		if (stored) {
-			const entries = Array.isArray(stored.entries) ? stored.entries : [];
-			const settings = stored.settings ? stored.settings : {};
+			const entries: TimelineEntry[] = Array.isArray(stored.entries) ? stored.entries : [];
+			const settings: Partial<TimeLineStampSettings> = stored.settings ?? {};
 			this.data = {
 				entries,
 				settings: { ...DEFAULT_SETTINGS, ...settings }
@@ -429,7 +428,7 @@ class TimestampModal extends Modal {
 	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.createEl("h2", { text: "Select timestamp" });
+		new Setting(contentEl).setName("Select timestamp").setHeading();
 
 		const form = contentEl.createEl("form", { cls: "timeline-stamp-modal" });
 		form.addEventListener("submit", (event) => {
@@ -480,7 +479,7 @@ class TimestampModal extends Modal {
 		const value = this.input.value;
 		const parsed = moment(value, "YYYY-MM-DDTHH:mm", true);
 		if (!parsed.isValid()) {
-			new Notice("TimeLineStamp: Enter a valid date and time.");
+			new Notice("Enter a valid date and time.");
 			return;
 		}
 
@@ -500,13 +499,13 @@ class TimeLineStampSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
-		containerEl.createEl("h2", { text: "TimeLineStamp Settings" });
 
 		new Setting(containerEl)
 			.setName("Timestamp format")
 			.setDesc("Moment.js format string used when stamping selections.")
 			.addText((text) => {
 				text
+					// eslint-disable-next-line obsidianmd/ui/sentence-case
 					.setPlaceholder("YYYY-MM-DD HH:mm")
 					.setValue(this.plugin.settings.timestampFormat)
 					.onChange(async (value) => {
@@ -540,22 +539,24 @@ class TimelineView extends ItemView implements TimelineRefreshable {
 	}
 
 	getDisplayText(): string {
-		return "TimeLineStamp Timeline";
+		return "Timeline";
 	}
 
 	getIcon(): string {
 		return "clock";
 	}
 
-	async onOpen(): Promise<void> {
+	onOpen(): Promise<void> {
 		this.plugin.registerTimelineView(this);
 		this.contentEl.addClass("timeline-stamp-view");
 		this.render();
+		return Promise.resolve();
 	}
 
-	async onClose(): Promise<void> {
+	onClose(): Promise<void> {
 		this.plugin.unregisterTimelineView(this);
 		this.contentEl.empty();
+		return Promise.resolve();
 	}
 
 	refreshEntries(): void {
@@ -570,7 +571,7 @@ class TimelineView extends ItemView implements TimelineRefreshable {
 
 		if (entries.length === 0) {
 			const emptyEl = contentEl.createEl("p", {
-				text: "No timestamps yet. Highlight text or images and run a TimeLineStamp command."
+				text: "No timestamps yet. Highlight text or images and run a timestamp command."
 			});
 			emptyEl.addClass("timeline-stamp-view__empty");
 			return;
@@ -626,7 +627,7 @@ class TimelineView extends ItemView implements TimelineRefreshable {
 	private async openEntry(entry: TimelineEntry): Promise<void> {
 		const abstract = this.app.vault.getAbstractFileByPath(entry.filePath);
 		if (!(abstract instanceof TFile)) {
-			new Notice("TimeLineStamp: Original file no longer exists.");
+			new Notice("Original file no longer exists.");
 			return;
 		}
 
